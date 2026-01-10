@@ -169,7 +169,7 @@ def extract_clean_output(content):
 # @param client: Ollama client
 # @param verbose: enable verbose output
 # @return: processed dataset
-def process_dataset_with_model(dataset, model, prompt, out_transfer_field, lang="English", client=None, verbose=False):
+def process_dataset_with_model(dataset, model, prompt, out_transfer_field, lang="English", client=None, verbose=False, droped_csv=None):
 
     rows_to_remove = []
     data_to_write = []
@@ -340,7 +340,7 @@ if __name__ == "__main__":
         if args.verbose:
             print(f"Processing Stage {stage + 1} with Model: {model}, Out Transfer Field: {outField} and Prompt: {prompt}")
 
-        dataset = process_dataset_with_model(dataset, model, prompt, outField, lang=args.to_lang, client=client, verbose=args.verbose)
+        dataset = process_dataset_with_model(dataset, model, prompt, outField, lang=args.to_lang, client=client, droped_csv=args.droped_csv, verbose=args.verbose)
 
     #push dataset to hf
     dataset.push_to_hub(args.hf_output, token=args.hf_token)

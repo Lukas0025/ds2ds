@@ -1,7 +1,7 @@
 #!/bin/bash
 # Example script to run a 4-stage translation process. In fisrt 3 stage, model asked to translate text into target language (For one column is one stage),
 # in last stage, model is asked to verify the translation.
-# using ds2ds.py with gpt-oss model.
+# using ds2ds.py with gemma3:12b and qwen3:14b models.
 # Make sure to set the HF_TOKEN environment variable before running.
 # Usage: ./explanation.sh
 #
