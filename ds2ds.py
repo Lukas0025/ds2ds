@@ -8,6 +8,7 @@ from ollama import chat, ChatResponse, Client
 import argparse
 from tqdm import tqdm
 import pandas as pd
+import os
 
 
 ##
