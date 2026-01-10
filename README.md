@@ -4,13 +4,11 @@ A tool for converting and processing datasets using LLM models from Ollama. Enab
 
 ## Features
 
-- 🔄 **Multi-stage processing** - Multiple stages with different models and prompts
-- 🎯 **Custom prompts** - Define a prompt for each stage
-- ✅ **Text verification** - Automatically remove erroneous items (`>>VERIFY<<`)
-- 🌍 **Translation** - Translate content to any language (`>>TRANSLATE<<`)
-- 🧠 **Clean outputs** - Automatically remove thinking blocks from models
-- 📊 **Progress bar** - Visualize processing progress
-- 📈 **Limiting** - Process only N items or from a specific index
+- **Multi-stage processing** - Multiple stages with different models and prompts
+- **Custom prompts** - Define a prompt for each stage
+- **Text verification** - Automatically remove erroneous items (`>>VERIFY<<`)
+- **Translation** - Translate content to any language (`>>TRANSLATE<<`)
+- **Clean outputs** - Automatically remove thinking blocks from models
 
 ## Setup
 
