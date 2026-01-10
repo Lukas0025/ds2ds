@@ -12,4 +12,4 @@ python3 ../ds2ds.py \
     "Napiš řešení pro následující úkol, výsledek zvírazni a postup dobře vysvětli, počítej že současný rok je {year}, česky:\n\n{question}" \
     --ollama_host "http://10.0.0.81:11434" --hf_token $HF_TOKEN \
     --hf_source "hynky/klokan-qa" --hf_output "lukasplevac/klokan-explanation" \
-    --out_transfer_fields ">>NOT_EQ_DROP<<{correct_answer}" "explanation" --stages 2 --limit 2
+    --out_transfer_fields ">>NOT_EQ_DROP<<{correct_answer}" "explanation" --stages 2 --limit 2 --droped_csv "dropped_items.csv"

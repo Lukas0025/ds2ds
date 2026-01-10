@@ -126,7 +126,8 @@ python ds2ds.py \
 - `--to_lang` - Target language for translation (default: English)
 - `--start_index` - Start from index (default: 0)
 - `--limit` - Maximum number of items (default: all)
-- `--verbose` - Detailed output
+- `--verbose` - Detailed output (default: False)
+- `--droped_csv` - Path to save droped items as CSV (default: None)
 
 ## Special prompts
 

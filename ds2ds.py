@@ -1,8 +1,18 @@
+# @author: Lukas Plevac
+# @date:   2026-01-10
+# @description: Convert datasets using advanced LLMs from Ollama hosts.
+
+
 from datasets import load_dataset
 from ollama import chat, ChatResponse, Client
 import argparse
 from tqdm import tqdm
+import pandas as pd
 
+
+##
+# Parse command line arguments
+##
 def parseCliArgs():
 
     parser = argparse.ArgumentParser(
@@ -90,6 +100,13 @@ def parseCliArgs():
     )
 
     parser.add_argument(
+        "--droped_csv",
+        type=str,
+        default=None,
+        help="Path to save droped items as CSV (default: None)"
+    )
+
+    parser.add_argument(
         "--verbose",
         action="store_true",
         help="Enable verbose output."
@@ -109,6 +126,9 @@ def parseCliArgs():
 
     return args
 
+## Parse error counts from model response
+# @param text: model response text
+# @return: tuple of (grammar_errors, logic_errors, spelling_errors)
 def parse_errors(text):
     try:
         # Odstraníme všechny znaky kromě číslic a čárek
@@ -123,6 +143,9 @@ def parse_errors(text):
         # Pokud se cokoli pokazí, vrátíme 1
         return 1, 1, 1
 
+## Extract clean output from model response
+# @param content: model response content
+# @return: cleaned content without thinking blocks 
 def extract_clean_output(content):
     """Extracts clean output from model response, removing thinking blocks."""
     import re
@@ -137,6 +160,15 @@ def extract_clean_output(content):
     
     return content
 
+## Process dataset with specified model and prompt
+# @param dataset: input dataset
+# @param model: model name
+# @param prompt: prompt template
+# @param out_transfer_field: output field name or special command
+# @param lang: target language for translation
+# @param client: Ollama client
+# @param verbose: enable verbose output
+# @return: processed dataset
 def process_dataset_with_model(dataset, model, prompt, out_transfer_field, lang="English", client=None, verbose=False):
 
     rows_to_remove = []
@@ -156,11 +188,13 @@ def process_dataset_with_model(dataset, model, prompt, out_transfer_field, lang=
 
             if len(input_text.strip()) == 0:
                 if len(dataset[i][out_transfer_field].strip()) == 0: # nothing to translate
+                    data_to_write.append("")
                     continue
 
                 input_text = f"Translate the following text into {lang}. Do not add explanations or comments—write only the translated text:\n\n{dataset[i][out_transfer_field]}"
             else:
                 if len(input_text.strip()) == 0: # nothing to translate
+                    data_to_write.append("")
                     continue
 
                 input_text = f"Translate the following text into {lang}. Do not add explanations or comments—write only the translated text:\n\n{input_text}"
@@ -211,14 +245,26 @@ def process_dataset_with_model(dataset, model, prompt, out_transfer_field, lang=
             verify_counter_good += 1
 
         else:
-            if out_transfer_field not in dataset.column_names:
-                dataset = dataset.add_column(out_transfer_field, [None] * len(dataset))
-
             data_to_write.append(clean_output)
 
     # Remove rows by selecting indices to keep (Dataset has `select`, not `remove_rows`)
     if rows_to_remove:
         remove_set = set(rows_to_remove)
+
+        # save droped items as csv
+        if droped_csv:
+            droped_items = [dataset[i] for i in rows_to_remove]
+            df = pd.DataFrame(droped_items)
+
+            # if file exists, append without writing header
+            if os.path.exists(droped_csv):
+                df.to_csv(droped_csv, mode='a', header=False, index=False)
+            else:
+                df.to_csv(droped_csv, index=False)
+
+            if verbose:
+                print(f"Saved dropped items to {droped_csv}")
+
         keep_indices = [idx for idx in range(len(dataset)) if idx not in remove_set]
         dataset = dataset.select(keep_indices)
 
@@ -233,6 +279,7 @@ def process_dataset_with_model(dataset, model, prompt, out_transfer_field, lang=
 
     return dataset
 
+## Main execution
 if __name__ == "__main__":
     args = parseCliArgs()
     
