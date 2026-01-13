@@ -332,6 +332,9 @@ if __name__ == "__main__":
         host=args.ollama_host
     )
 
+    # note the time of start
+    start_time = pd.Timestamp.now()
+
     # for each stage, process the dataset
     for stage in range(args.stages):
         prompt   = args.prompts[stage] if args.prompts else None
@@ -342,6 +345,12 @@ if __name__ == "__main__":
             print(f"Processing Stage {stage + 1} with Model: {model}, Out Transfer Field: {outField} and Prompt: {prompt}")
 
         dataset = process_dataset_with_model(dataset, model, prompt, outField, lang=args.to_lang, client=client, droped_csv=args.droped_csv, verbose=args.verbose)
+
+    # note the time of end
+    end_time = pd.Timestamp.now()
+    duration = end_time - start_time
+    
+    print(f"Processing completed in {duration}.")
 
     #push dataset to hf
     dataset.push_to_hub(args.hf_output, token=args.hf_token)

@@ -11,4 +11,4 @@ python3 ../ds2ds.py --to_lang Czech \
     --prompts ">>TRANSLATE<<" ">>TRANSLATE<<" ">>TRANSLATE<<" ">>VERIFY<<instruction:\n{instruction}\n\ninput:\n{input}\n\noutput:\n{output}" \
     --ollama_host "http://10.0.0.81:11434" --hf_token $HF_TOKEN \
     --hf_source "yahma/alpaca-cleaned" --hf_output "lukasplevac/alpaca-cs" \
-    --out_transfer_fields "instruction" "input" "output" ">>VERIFY<<" --stages 4 --limit 10 --droped_csv "dropped_items.csv"
+    --out_transfer_fields "instruction" "input" "output" ">>VERIFY<<" --stages 4 --limit 100 --droped_csv "dropped_items.csv"
