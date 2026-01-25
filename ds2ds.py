@@ -71,6 +71,27 @@ def parseCliArgs():
     )
 
     parser.add_argument(
+        "--to_lang_code",
+        type=str,
+        default=None,
+        help="Target language code for translation."
+    )
+
+    parser.add_argument(
+        "--from_lang",
+        type=str,
+        default=None,
+        help="Source language for translation."
+    )
+
+    parser.add_argument(
+        "--from_lang_code",
+        type=str,
+        default=None,
+        help="Source language code for translation."
+    )
+
+    parser.add_argument(
         "--prompts",
         type=str,
         nargs='+',
@@ -170,7 +191,7 @@ def extract_clean_output(content):
 # @param client: Ollama client
 # @param verbose: enable verbose output
 # @return: processed dataset
-def process_dataset_with_model(dataset, model, prompt, out_transfer_field, lang="English", client=None, verbose=False, droped_csv=None):
+def process_dataset_with_model(dataset, model, prompt, out_transfer_field, lang="English", client=None, verbose=False, droped_csv=None, SOURCE_LANG=None, SOURCE_CODE=None, TARGET_CODE=None):
 
     rows_to_remove = []
     data_to_write = []
@@ -187,18 +208,29 @@ def process_dataset_with_model(dataset, model, prompt, out_transfer_field, lang=
         if prompt and prompt.startswith(">>TRANSLATE<<"):
             input_text = input_text.replace(">>TRANSLATE<<", "")
 
+            local_promt = f"Translate the following text into {lang}. Do not add explanations or comments—write only the translated text:\n\n"
+
+            # build promt for https://ollama.com/library/translategemma
+            if SOURCE_CODE is not None and SOURCE_LANG is not None and TARGET_CODE is not None:
+                local_promt = f"""You are a professional {SOURCE_LANG} ({SOURCE_CODE}) to {lang} ({TARGET_CODE}) translator. Your goal is to accurately convey the meaning and nuances of the original {SOURCE_LANG} text while adhering to {lang} grammar, vocabulary, and cultural sensitivities.
+Produce only the {lang} translation, without any additional explanations or commentary. Please translate the following {SOURCE_LANG} text into {lang}:
+
+
+
+"""
+
             if len(input_text.strip()) == 0:
                 if len(dataset[i][out_transfer_field].strip()) == 0: # nothing to translate
                     data_to_write.append("")
                     continue
 
-                input_text = f"Translate the following text into {lang}. Do not add explanations or comments—write only the translated text:\n\n{dataset[i][out_transfer_field]}"
+                input_text = f"{local_promt}{dataset[i][out_transfer_field]}"
             else:
                 if len(input_text.strip()) == 0: # nothing to translate
                     data_to_write.append("")
                     continue
 
-                input_text = f"Translate the following text into {lang}. Do not add explanations or comments—write only the translated text:\n\n{input_text}"
+                input_text = f"{local_promt}{input_text}"
 
 
         response: ChatResponse = client.chat(
@@ -344,7 +376,7 @@ if __name__ == "__main__":
         if args.verbose:
             print(f"Processing Stage {stage + 1} with Model: {model}, Out Transfer Field: {outField} and Prompt: {prompt}")
 
-        dataset = process_dataset_with_model(dataset, model, prompt, outField, lang=args.to_lang, client=client, droped_csv=args.droped_csv, verbose=args.verbose)
+        dataset = process_dataset_with_model(dataset, model, prompt, outField, lang=args.to_lang, client=client, droped_csv=args.droped_csv, verbose=args.verbose, SOURCE_LANG=args.from_lang_code, SOURCE_CODE=args.from_lang, TARGET_CODE=args.to_lang_code)
 
     # note the time of end
     end_time = pd.Timestamp.now()
